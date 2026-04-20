@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)https://8080-ij0xcpaf2z0soybdpu2h2-4a5ad85f.us1.manus.computer/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Department Dashboard</title>
+  <script src="./IT Department Dashboard_files/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --accent-blue: #4f8ef7;
+      --accent-purple: #9b6dff;
+      --accent-green: #34d399;
+      --accent-orange: #f97316;
+      --accent-red: #f43f5e;
+      --accent-yellow: #fbbf24;
+      --text: #e2e8f0;
+      --text-muted: #8892a4;
+      --text-dim: #5a6480;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #22263a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #4f8ef7, #9b6dff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .header-meta span {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── Layout ── */
+    main {
+      padding: 28px 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── KPI Cards ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .kpi-row:last-of-type { margin-bottom: 0; }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 14px 14px 0 0;
+    }
+    .kpi-card.blue::before   { background: var(--accent-blue); }
+    .kpi-card.purple::before { background: var(--accent-purple); }
+    .kpi-card.green::before  { background: var(--accent-green); }
+    .kpi-card.orange::before { background: var(--accent-orange); }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .kpi-value {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .kpi-card.blue   .kpi-value { color: var(--accent-blue); }
+    .kpi-card.purple .kpi-value { color: var(--accent-purple); }
+    .kpi-card.green  .kpi-value { color: var(--accent-green); }
+    .kpi-card.orange .kpi-value { color: var(--accent-orange); }
+
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .kpi-icon {
+      position: absolute;
+      top: 18px; right: 20px;
+      font-size: 1.6rem;
+      opacity: 0.15;
+    }
+
+    /* ── Charts Grid ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+    }
+    .chart-card h3 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 220px;
+    }
+
+    /* ── Hours Split Bar ── */
+    .hours-split {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+    }
+    .hours-split h3 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .split-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .split-label {
+      width: 80px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .split-bar-bg {
+      flex: 1;
+      height: 28px;
+      background: var(--surface2);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .split-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .split-bar-fill.support { background: linear-gradient(90deg, #4f8ef7, #6fa8ff); }
+    .split-bar-fill.project { background: linear-gradient(90deg, #9b6dff, #b89aff); }
+    .split-val {
+      width: 70px;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── Status Badges ── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .status-grid { grid-template-columns: 1fr; }
+    }
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+    }
+    .status-card h3 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .status-list { display: flex; flex-direction: column; gap: 8px; }
+    .status-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .status-name { display: flex; align-items: center; color: var(--text); }
+    .status-count {
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚙ IT Department Dashboard</h1>
+  <div class="header-meta">
+    <span id="lastUpdated">Updated Apr 20, 2026</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── KPI SECTION ── -->
+  <div class="section-title">Overview</div>
+
+  <!-- Row 1: Total Active Tickets | Linear Tasks (No Tickets) | Total Work Items | Total Estimated Hours -->
+  <div class="kpi-row">
+
+    <div class="kpi-card blue" style="cursor:pointer;" onclick="window.open(&#39;tickets.html&#39;,&#39;_blank&#39;)">
+      <div class="kpi-icon">🎫</div>
+      <div class="kpi-label">Total Active Tickets</div>
+      <div class="kpi-value">191</div>
+      <div class="kpi-sub">Non-closed &amp; non-resolved (L&amp;M Connect3)</div>
+      <div style="margin-top:8px;font-size:11px;color:#90cdf4;text-decoration:underline;">📋 View Full Tickets Table →</div>
+      <div style="margin-top:4px;font-size:11px;color:#68d391;text-decoration:underline;cursor:pointer;" onclick="event.stopPropagation();window.open(&#39;resolved_tickets.html&#39;,&#39;_blank&#39;)">✅ View Resolved Tickets →</div>
+    </div>
+
+    <div class="kpi-card" style="border-color:#a3e63533; background:linear-gradient(135deg,#1a1d27,#1a2a10)">
+      <div class="kpi-icon">🟢</div>
+      <div class="kpi-label" style="color:#a3e635">Linear Tasks (No Ticket)</div>
+      <div class="kpi-value" style="color:#a3e635">160</div>
+      <div class="kpi-sub">Active Linear tasks with <strong>no Connect3 ticket</strong> reference</div>
+    </div>
+
+    <div class="kpi-card" style="border-color:#fbbf2433; background:linear-gradient(135deg,#1a1d27,#2a2010)">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label" style="color:#fbbf24">Total Work Items</div>
+      <div class="kpi-value" style="color:#fbbf24">351</div>
+      <div class="kpi-sub"><strong>191</strong> Connect3 tickets + <strong>160</strong> pure Linear tasks</div>
+    </div>
+
+    <div class="kpi-card orange">
+      <div class="kpi-icon">⏱</div>
+      <div class="kpi-label">Total Estimated Hours</div>
+      <div class="kpi-value" id="kpiHours">494</div>
+      <div class="kpi-sub" id="kpiHoursSub">227h Support + 267h Projects (Linear)</div>
+    </div>
+
+  </div>
+
+  <!-- Row 2: Support Tasks | Project Tasks | Connect Tickets In Linear | Unlabeled Tasks -->
+  <div class="kpi-row">
+
+    <div class="kpi-card purple">
+      <div class="kpi-icon">🛠</div>
+      <div class="kpi-label">Support Tasks (Linear)</div>
+      <div class="kpi-value" id="kpiSupport">88</div>
+      <div class="kpi-sub">Active tasks labeled <strong>Support</strong></div>
+    </div>
+
+    <div class="kpi-card green">
+      <div class="kpi-icon">📁</div>
+      <div class="kpi-label">Project Tasks (Linear)</div>
+      <div class="kpi-value" id="kpiProjects">72</div>
+      <div class="kpi-sub">Active tasks labeled <strong>Projects</strong></div>
+    </div>
+
+    <div class="kpi-card" style="border-color:#06b6d433; background:linear-gradient(135deg,#1a1d27,#0d2030)">
+      <div class="kpi-icon">🔗</div>
+      <div class="kpi-label" style="color:#06b6d4">Connect3 Tickets in Linear</div>
+      <div class="kpi-value" style="color:#06b6d4">34</div>
+      <div class="kpi-sub"><strong>34</strong> Connect3 tickets matched to Linear tasks</div>
+    </div>
+
+    <div class="kpi-card" style="border-color:#f43f5e33; background:linear-gradient(135deg,#1a1d27,#2a1a20)">
+      <div class="kpi-icon">🏷️</div>
+      <div class="kpi-label" style="color:#f43f5e">Unlabeled Tasks (Linear)</div>
+      <div class="kpi-value" style="color:#f43f5e">22</div>
+      <div class="kpi-sub">Active tasks with <strong>no Support or Projects</strong> label</div>
+    </div>
+
+  </div>
+
+  <!-- ── CUSTOMER DETAIL TABLE ── -->
+  <div class="section-title">Customer Detail (Linear — Open Tasks)</div>
+  <div class="hours-split" style="margin-top:0">
+    <h3>Customer Detail Table</h3>
+    <div style="overflow-x:auto">
+      <table id="customerTable" style="width:100%;border-collapse:collapse;font-size:0.85rem">
+        <thead>
+          <tr style="border-bottom:1px solid #2e3250">
+            <th style="text-align:left;padding:8px 12px;color:#8892a4;font-weight:600">Customer</th>
+            <th style="text-align:right;padding:8px 12px;color:#8892a4;font-weight:600">Tasks</th>
+            <th style="text-align:right;padding:8px 12px;color:#8892a4;font-weight:600">Est. Hours</th>
+            <th style="text-align:left;padding:8px 12px;color:#8892a4;font-weight:600">Status Breakdown</th>
+          </tr>
+        </thead>
+        <tbody id="customerTableBody">
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4f8ef7;margin-right:8px"></span>All
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#4f8ef7;font-weight:700">86</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">284h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#4f8ef722;color:#4f8ef7">Todo: 47</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#4f8ef722;color:#4f8ef7">Backlog: 23</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#4f8ef722;color:#4f8ef7">On Hold: 7</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#4f8ef722;color:#4f8ef7">Go Live Ready: 3</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#4f8ef722;color:#4f8ef7">Code Review: 3</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#4f8ef722;color:#4f8ef7">Recheck: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#9b6dff;margin-right:8px"></span>Sovereign
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#9b6dff;font-weight:700">27</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">71h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#9b6dff22;color:#9b6dff">Todo: 21</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#9b6dff22;color:#9b6dff">Backlog: 5</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#34d399;margin-right:8px"></span>SLO
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#34d399;font-weight:700">16</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">47h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#34d39922;color:#34d399">Todo: 11</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#34d39922;color:#34d399">In Review: 1</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#34d39922;color:#34d399">Recheck: 1</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#34d39922;color:#34d399">Code Review: 1</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#34d39922;color:#34d399">Backlog: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-right:8px"></span>Liquid Death
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#f97316;font-weight:700">11</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">31h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#f9731622;color:#f97316">Todo: 6</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#f9731622;color:#f97316">Backlog: 3</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#f9731622;color:#f97316">Go Live Ready: 2</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f43f5e;margin-right:8px"></span>Fiber Gourmet
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#f43f5e;font-weight:700">6</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">12h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#f43f5e22;color:#f43f5e">Todo: 5</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#f43f5e22;color:#f43f5e">Backlog: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fbbf24;margin-right:8px"></span>RNDC
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#fbbf24;font-weight:700">4</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">15h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#fbbf2422;color:#fbbf24">Backlog: 3</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#fbbf2422;color:#fbbf24">Todo: 1</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#06b6d4;margin-right:8px"></span>Lucky Beverage
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#06b6d4;font-weight:700">4</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">10h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#06b6d422;color:#06b6d4">Todo: 2</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#06b6d422;color:#06b6d4">Go Live Ready: 1</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#06b6d422;color:#06b6d4">Backlog: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ec4899;margin-right:8px"></span>Shutterfly
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#ec4899;font-weight:700">3</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">6h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#ec489922;color:#ec4899">Todo: 2</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#ec489922;color:#ec4899">Backlog: 1</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#a3e635;margin-right:8px"></span>ASE
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#a3e635;font-weight:700">2</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">10h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#a3e63522;color:#a3e635">In Progress: 2</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fb923c;margin-right:8px"></span>Top Dog
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#fb923c;font-weight:700">2</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">6h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#fb923c22;color:#fb923c">Todo: 1</span><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#fb923c22;color:#fb923c">Backlog: 1</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#818cf8;margin-right:8px"></span>Palm Bay
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#818cf8;font-weight:700">2</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">5h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#818cf822;color:#818cf8">Backlog: 2</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2dd4bf;margin-right:8px"></span>Write-Off
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#2dd4bf;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">1h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#2dd4bf22;color:#2dd4bf">Todo: 1</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f472b6;margin-right:8px"></span>Ship Lab
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#f472b6;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">1h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#f472b622;color:#f472b6">To Order: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#84cc16;margin-right:8px"></span>Barker
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#84cc16;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">2h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#84cc1622;color:#84cc16">Todo: 1</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#38bdf8;margin-right:8px"></span>Pio Imports
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#38bdf8;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">1h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#38bdf822;color:#38bdf8">Todo: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#c084fc;margin-right:8px"></span>Steer
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#c084fc;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">2h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#c084fc22;color:#c084fc">Todo: 1</span></td>
+    </tr>
+    <tr style="background:#1e2235;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fb7185;margin-right:8px"></span>Moet
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#fb7185;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">4h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#fb718522;color:#fb7185">Todo: 1</span></td>
+    </tr>
+    <tr style="background:#1a1d27;border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#facc15;margin-right:8px"></span>Zing Zang
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:#facc15;font-weight:700">1</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">1h</td>
+      <td style="padding:8px 12px"><span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:#facc1522;color:#facc15">Backlog: 1</span></td>
+    </tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── HOURS SPLIT ── -->
+  <div class="section-title">Estimated Hours Breakdown (Linear)</div>
+  <div class="hours-split">
+    <h3>Hours by Label <span style="font-size:0.75rem;color:#8892a4;font-weight:400;margin-left:8px">— Open status tasks only (excl. Done, Canceled, Duplicate, Resolved)</span></h3>
+    <div class="split-row">
+      <div class="split-label">Support</div>
+      <div class="split-bar-bg">
+        <div class="split-bar-fill support" style="width:46%">227 hrs</div>
+      </div>
+      <div class="split-val">227 hrs</div>
+    </div>
+    <div class="split-row">
+      <div class="split-label">Projects</div>
+      <div class="split-bar-bg">
+        <div class="split-bar-fill project" style="width:54%">267 hrs</div>
+      </div>
+      <div class="split-val">267 hrs</div>
+    </div>
+  </div>
+
+  <!-- ── TICKETS ANALYSIS ── -->
+  <div class="section-title">Tickets Analysis (L&amp;M Connect3 — Live)</div>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <h3>Active Tickets — By Priority</h3>
+      <div class="chart-wrap">
+        <canvas id="ticketPriorityChart" width="608" height="220" style="display: block; box-sizing: border-box; height: 220px; width: 608px;"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Active Tickets — By Status</h3>
+      <div class="chart-wrap">
+        <canvas id="ticketStatusChart" width="608" height="220" style="display: block; box-sizing: border-box; height: 220px; width: 608px;"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CURRENT CYCLE ── -->
+  <div class="section-title">Current Cycle #<span id="cycleNum">77</span> — <span id="cycleName">04/20 - 04/26</span></div>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <h3>Support Tasks — By Status (Current Cycle)</h3>
+      <div class="chart-wrap">
+        <canvas id="cycleSupportStatusChart" width="608" height="220" style="display: block; box-sizing: border-box; height: 220px; width: 608px;"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Project Tasks — By Status (Current Cycle)</h3>
+      <div class="chart-wrap">
+        <canvas id="cycleProjectStatusChart" width="608" height="220" style="display: block; box-sizing: border-box; height: 220px; width: 608px;"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CYCLE HOURS OVERVIEW ── -->
+  <div class="section-title">Estimated Hours — Current Cycle (Support vs Projects)</div>
+  <div class="hours-split">
+    <h3>Total Estimated Hours — Cycle #<span id="cycleNumHours">77</span> <span style="font-size:0.75rem;color:#8892a4;font-weight:400;margin-left:8px">(open tasks only)</span></h3>
+    <div class="split-row">
+      <div class="split-label">Support</div>
+      <div class="split-bar-bg">
+        <div class="split-bar-fill support" id="cycleSupportBar" style="width:64%">124 hrs — 41 tasks</div>
+      </div>
+      <div class="split-val" id="cycleSupportVal">124 hrs</div>
+    </div>
+    <div class="split-row">
+      <div class="split-label">Projects</div>
+      <div class="split-bar-bg">
+        <div class="split-bar-fill project" id="cycleProjectBar" style="width:36%">69 hrs — 13 tasks</div>
+      </div>
+      <div class="split-val" id="cycleProjectVal">69 hrs</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  IT Department Dashboard — Data sourced from IT Management 2026 &amp; Linear Issues — Last refreshed: <span id="footerDate">Apr 20, 2026</span>
+</footer>
+
+<script>
+// ── DATA ── (excl. Canceled, Duplicate, Done, Resolved — active tasks only)
+const DATA = {
+  // Tickets — live from L&M Connect3 portal (non-closed, non-resolved)
+  totalTickets: 191,
+  ticketByStatus: {
+    'Open':               152,
+    'Awaiting Response':   18,
+    'In Progress':          9,
+    'On Hold':              8,
+    'Investigating':        4
+  },
+  ticketPriority: { urgent: 14, high: 58, normal: 82, low: 25 },
+
+  // Linear Support — excl. Canceled, Duplicate, Done, Resolved
+  supportCount: 88,
+  supportHours: 227,
+  supportByStatus: {
+    'Todo':          61,
+    'Go Live Ready':  8,
+    'On Hold':        7,
+    'In Progress':    4,
+    'Code Review':    2,
+    'Recheck':        2,
+    'Backlog':        2,
+    'In Review':      1,
+    'To Order':       1
+  },
+
+  // Linear Projects — excl. Canceled, Duplicate, Done, Resolved
+  projectCount: 72,
+  projectHours: 267,
+  projectByStatus: {
+    'Todo':          56,
+    'Backlog':        9,
+    'Go Live Ready':  3,
+    'On Hold':        2,
+    'Code Review':    1,
+    'To Order':       1
+  },
+
+  // Linear Unlabeled — active tasks with neither Support nor Projects label
+  // (excl. Canceled, Duplicate, Done, Resolved)
+  unlabeledCount: 22,
+  unlabeledByStatus: {
+    'Triage':      8,
+    'In Review':   7,
+    'In Progress': 3,
+    'Todo':        2,
+    'On Hold':     1,
+    'Question':    1
+  },
+
+  // Current Cycle #77 (04/20 - 04/26)
+  cycleNumber: 77,
+  cycleName: '04/20 - 04/26',
+  cycleSupportCount: 41,
+  cycleSupportHours: 124,
+  cycleProjectCount: 13,
+  cycleProjectHours: 69,
+  cycleSupportByStatus: {
+    'Todo':          21,
+    'Go Live Ready':  8,
+    'In Progress':    4,
+    'On Hold':        2,
+    'Code Review':    2,
+    'Recheck':        2,
+    'In Review':      1,
+    'To Order':       1
+  },
+  cycleProjectByStatus: {
+    'Todo':          7,
+    'Go Live Ready':  3,
+    'On Hold':        2,
+    'Code Review':    1
+  },
+
+  // Hours by assignee — Support (active only)
+  supportByAssignee: {
+    'Gil Pleczynski':  116,
+    'urgen':            65,
+    'soni':             24,
+    'nabin':            12,
+    'Thais Santos':     10
+  },
+
+  // Hours by assignee — Projects (active only)
+  projectsByAssignee: {
+    'Gil Pleczynski':  199,
+    'urgen':            43,
+    'soni':             21,
+    'nabin':             4
+  }
+};
+
+// ── COLORS ──
+const PRIORITY_COLORS = {
+  Urgent: '#f43f5e', urgent: '#f43f5e',
+  High:   '#f97316', high:   '#f97316',
+  Medium: '#fbbf24', normal: '#fbbf24',
+  Low:    '#34d399', low:    '#34d399'
+};
+
+const STATUS_COLORS = [
+  '#4f8ef7','#9b6dff','#34d399','#f97316','#f43f5e',
+  '#fbbf24','#06b6d4','#ec4899','#a3e635','#fb923c'
+];
+
+const TICKET_STATUS_COLORS = {
+  'Open':               '#4f8ef7',
+  'Awaiting Response':  '#fbbf24',
+  'In Planning':        '#9b6dff',
+  'In Progress':        '#34d399',
+  'On Hold':            '#f97316',
+  'Other':              '#8892a4'
+};
+
+const TOOLTIP = {
+  backgroundColor: '#22263a',
+  borderColor: '#2e3250',
+  borderWidth: 1,
+  titleColor: '#e2e8f0',
+  bodyColor: '#8892a4',
+  padding: 10
+};
+
+const LEGEND = {
+  labels: { color: '#8892a4', font: { size: 11 }, padding: 12, boxWidth: 12 }
+};
+
+// ── HELPERS ──
+function makeDonut(ctx, labels, values, colors) {
+  return new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderColor: '#1a1d27',
+        borderWidth: 3,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: { legend: LEGEND, tooltip: { ...TOOLTIP } }
+    }
+  });
+}
+
+function makeHBar(ctx, labels, values, colors) {
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { ...TOOLTIP } },
+      scales: {
+        x: { grid: { color: '#2e3250' }, ticks: { color: '#8892a4', font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: { color: '#e2e8f0', font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+// ── RENDER CHARTS ──
+
+// Ticket Priority Donut
+makeDonut(
+  document.getElementById('ticketPriorityChart'),
+  ['Urgent', 'High', 'Normal', 'Low'],
+  [DATA.ticketPriority.urgent, DATA.ticketPriority.high, DATA.ticketPriority.normal, DATA.ticketPriority.low],
+  ['#f43f5e', '#f97316', '#fbbf24', '#34d399']
+);
+
+// Ticket Status Donut
+makeDonut(
+  document.getElementById('ticketStatusChart'),
+  Object.keys(DATA.ticketByStatus),
+  Object.values(DATA.ticketByStatus),
+  Object.keys(DATA.ticketByStatus).map(k => TICKET_STATUS_COLORS[k] || '#8892a4')
+);
+
+// ── CURRENT CYCLE STATUS CHARTS ──
+
+// Support tasks by status — current cycle
+makeHBar(
+  document.getElementById('cycleSupportStatusChart'),
+  Object.keys(DATA.cycleSupportByStatus),
+  Object.values(DATA.cycleSupportByStatus),
+  STATUS_COLORS.slice(0, Object.keys(DATA.cycleSupportByStatus).length)
+);
+
+// Project tasks by status — current cycle
+makeHBar(
+  document.getElementById('cycleProjectStatusChart'),
+  Object.keys(DATA.cycleProjectByStatus),
+  Object.values(DATA.cycleProjectByStatus),
+  STATUS_COLORS.slice(0, Object.keys(DATA.cycleProjectByStatus).length)
+);
+
+// ── CUSTOMER TABLE ──
+const CUSTOMER_DATA = {
+  'All':           { count: 86,  hours: 284 },
+  'Sovereign':     { count: 27,  hours: 71  },
+  'SLO':           { count: 16,  hours: 47  },
+  'Liquid Death':  { count: 11,  hours: 31  },
+  'Fiber Gourmet': { count: 6,   hours: 12  },
+  'RNDC':          { count: 4,   hours: 15  },
+  'Lucky Beverage':{ count: 4,   hours: 10  },
+  'Shutterfly':    { count: 3,   hours: 6   },
+  'ASE':           { count: 2,   hours: 10  },
+  'Top Dog':       { count: 2,   hours: 6   },
+  'Palm Bay':      { count: 2,   hours: 5   },
+  'Write-Off':     { count: 1,   hours: 1   },
+  'Ship Lab':      { count: 1,   hours: 1   },
+  'Barker':        { count: 1,   hours: 2   },
+  'Pio Imports':   { count: 1,   hours: 1   },
+  'Steer':         { count: 1,   hours: 2   },
+  'Moet':          { count: 1,   hours: 4   },
+  'Zing Zang':     { count: 1,   hours: 1   }
+};
+
+const CUSTOMER_STATUSES = {
+  'All':           { 'Todo':47, 'Backlog':23, 'On Hold':7, 'Go Live Ready':3, 'Code Review':3, 'Recheck':1 },
+  'Sovereign':     { 'Todo':21, 'Backlog':5 },
+  'SLO':           { 'Todo':11, 'In Review':1, 'Recheck':1, 'Code Review':1, 'Backlog':1 },
+  'Liquid Death':  { 'Todo':6, 'Backlog':3, 'Go Live Ready':2 },
+  'Fiber Gourmet': { 'Todo':5, 'Backlog':1 },
+  'RNDC':          { 'Backlog':3, 'Todo':1 },
+  'Lucky Beverage':{ 'Todo':2, 'Go Live Ready':1, 'Backlog':1 },
+  'Shutterfly':    { 'Todo':2, 'Backlog':1 },
+  'ASE':           { 'In Progress':2 },
+  'Top Dog':       { 'Todo':1, 'Backlog':1 },
+  'Palm Bay':      { 'Backlog':2 },
+  'Write-Off':     { 'Todo':1 },
+  'Ship Lab':      { 'To Order':1 },
+  'Barker':        { 'Todo':1 },
+  'Pio Imports':   { 'Todo':1 },
+  'Steer':         { 'Todo':1 },
+  'Moet':          { 'Todo':1 },
+  'Zing Zang':     { 'Backlog':1 }
+};
+
+const custColors = [
+  '#4f8ef7','#9b6dff','#34d399','#f97316','#f43f5e','#fbbf24',
+  '#06b6d4','#ec4899','#a3e635','#fb923c','#818cf8','#2dd4bf',
+  '#f472b6','#84cc16','#38bdf8','#c084fc','#fb7185','#facc15'
+];
+
+const tbody = document.getElementById('customerTableBody');
+Object.entries(CUSTOMER_DATA).forEach(([name, d], i) => {
+  const statuses = CUSTOMER_STATUSES[name] || {};
+  const statusBadges = Object.entries(statuses)
+    .sort((a,b) => b[1]-a[1])
+    .map(([s,c]) => `<span style="display:inline-block;margin:1px 3px;padding:1px 7px;border-radius:10px;font-size:0.75rem;background:${custColors[i]}22;color:${custColors[i]}">${s}: ${c}</span>`)
+    .join('');
+  const rowBg = i % 2 === 0 ? '#1e2235' : '#1a1d27';
+  tbody.innerHTML += `
+    <tr style="background:${rowBg};border-bottom:1px solid #2e3250">
+      <td style="padding:8px 12px;color:#e2e8f0;font-weight:500">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${custColors[i]};margin-right:8px"></span>${name}
+      </td>
+      <td style="padding:8px 12px;text-align:right;color:${custColors[i]};font-weight:700">${d.count}</td>
+      <td style="padding:8px 12px;text-align:right;color:#8892a4">${d.hours}h</td>
+      <td style="padding:8px 12px">${statusBadges}</td>
+    </tr>`;
+});
+
+// ── DATE ──
+const now = new Date();
+const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+document.getElementById('lastUpdated').textContent = 'Updated ' + dateStr;
+document.getElementById('footerDate').textContent = dateStr;
+</script>
+
+
+<scribe-shadow id="crxjs-ext" data-crx="okfkdaglfjjjfefdcppliegebpoegaii" style="position: fixed; width: 0px; height: 0px; top: 0px; left: 0px; z-index: 2147483647; overflow: visible; visibility: visible;"><template shadowrootmode="open"><div id="root-scribe-elem" style="position: fixed; width: 0px; height: 0px; top: 0px; left: 0px; overflow: visible; color: rgb(21, 24, 30);"><div role="region" aria-label="Notifications (F8)" tabindex="-1" style="pointer-events: none;"><ol tabindex="-1" class="fixed bottom-auto right-0 top-0 z-[999999] flex max-h-screen w-[400px] max-w-full p-4 pointer-events-none"></ol></div></div><link rel="stylesheet" href="chrome-extension://okfkdaglfjjjfefdcppliegebpoegaii/assets/style.css"></template></scribe-shadow></body></html>
